@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/graph.hpp
+iostream
+-
+vector
+-
+memory
+-
+utility
+-
+
+/home/mathias/M1_IMA/S1/COMPLEX/CPLX_graph_cover/src/graph.cpp
+graph.hpp
+/home/mathias/M1_IMA/S1/COMPLEX/CPLX_graph_cover/src/graph.hpp
+

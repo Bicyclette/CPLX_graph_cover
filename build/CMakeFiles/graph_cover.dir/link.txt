@@ -1,0 +1,1 @@
+/usr/bin/c++  -O3 -DNDEBUG   CMakeFiles/graph_cover.dir/src/main.cpp.o CMakeFiles/graph_cover.dir/src/graph.cpp.o  -o graph_cover 

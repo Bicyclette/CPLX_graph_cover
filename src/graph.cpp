@@ -41,8 +41,18 @@ void Graph::init()
 		}
 		adjacency[i][j] = true;
 		adjacency[j][i] = true;
-		vertices[i].degree++;
-		vertices[j].degree++;
+	}
+
+	// compute vertex degree
+	for(int i{0}; i < vertices.size(); ++i)
+	{
+		for(int j{0}; j < edges.size(); ++j)
+		{
+			int fromId{getVertexIndex(vertices, edges[j].from)};
+			int toId{getVertexIndex(vertices, edges[j].to)};
+			if(vertices[i].id == fromId || vertices[i].id == toId)
+				vertices[i].degree++;
+		}
 	}
 }
 

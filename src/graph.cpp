@@ -2,7 +2,7 @@
 
 std::vector<struct vertex> Graph::solution;
 std::vector<struct vertex> Graph::path;
-std::stack<Graph> Graph::branch_stack;
+std::stack<std::reference_wrapper<Graph>> Graph::branch_stack;
 
 Graph::Graph(int num_vertex, double p)
 {
@@ -304,24 +304,26 @@ std::vector<struct vertex> Graph::init_branch()
 	if(edges.empty() == 0)
 		return vertices;
 
-	// on empile le graphe
-	branch_stack.push(*this);
-
 	// on prend une arête
 	struct edge e{edges[0]};
 
-	path.push_back(e.from);
-	explore = get_reachable_vertices(e.from);
+	// on empile les deux sous graphes
 	Graph g1 = removeVerticesCpy({e.from});
-	g1.branch(explore);
-	path.pop_back();
-
-	path.push_back(e.to);
-	explore = get_reachable_vertices(e.to);
 	Graph g2 = removeVerticesCpy({e.to});
-	g2.branch(explore);
+	branch_stack.push(g1);
+	branch_stack.push(g2);
+
+	// on branche
+	path.push_back(e.from);
+	branch_stack.top().get().branch(explore);
+	branch_stack.pop();
+	path.pop_back();
+	path.push_back(e.to);
+	branch_stack.top().get().branch(explore);
+	branch_stack.pop();
 	path.pop_back();
 
+	// fin
 	return solution;
 }
 
@@ -339,10 +341,13 @@ void Graph::branch(const std::vector<struct vertex> & g_explore)
 	{
 		for(auto v : g_explore) // explore tous les sommets atteignables
 		{
-			path.push_back(v);
 			explore = get_reachable_vertices(v.id);
 			Graph g = removeVerticesCpy({v});
+			branch_stack.push(g);
+			path.push_back(v);
 			g.branch(explore);
+			branch_stack.top().get().branch(explore);
+			branch_stack.pop();
 			path.pop_back();
 		}
 	}

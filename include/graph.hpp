@@ -7,6 +7,7 @@
 #include <utility>
 #include <algorithm>
 #include <random>
+#include <functional>
 #include <stack>
 
 struct vertex
@@ -56,7 +57,7 @@ class Graph
 	public:
 		static std::vector<struct vertex> solution; // notre best value
 		static std::vector<struct vertex> path;
-		static std::stack<Graph> branch_stack;
+		static std::stack<std::reference_wrapper<Graph>> branch_stack;
 };
 
 

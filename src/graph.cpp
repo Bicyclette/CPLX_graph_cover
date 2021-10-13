@@ -1,5 +1,40 @@
 #include "graph.hpp"
 
+Graph::Graph(int num_vertex, double p)
+{
+	std::function getVertexIndex = [] (std::vector<vertex> & v, int id) -> int {
+		int index{-1};
+		for(int i{0}; i < v.size(); ++i)
+		{
+			if(v[i].id == id)
+			{
+				index = i;
+				break;
+			}
+		}
+		return index;
+	};
+
+	std::random_device rd;
+	std::mt19937 mt(rd());
+	std::uniform_real_distribution<double> dist(0.0, 1.0);
+
+	for(int i{0}; i < num_vertex; ++i)
+	{
+		for(int j{i+1}; j < num_vertex; ++j)
+		{
+			if(getVertexIndex(vertices, i) == -1)
+				vertices.emplace_back(i);
+			if(getVertexIndex(vertices, j) == -1)
+				vertices.emplace_back(j);
+			if(dist(mt) <= p)
+				edges.emplace_back(i, j);
+		}
+	}
+
+	init();
+}
+
 Graph::Graph(std::vector<struct vertex> v, std::vector<struct edge> e) :
 	vertices(v),
 	edges(e)
@@ -84,12 +119,17 @@ std::vector<struct vertex> Graph::getVertices()
 	return vertices;
 }
 
+std::vector<struct vertex> Graph::getVerticesDegree()
+{
+	return vertices;
+}
+
 std::vector<struct edge> Graph::getEdges()
 {
 	return edges;
 }
 
-std::unique_ptr<Graph> removeVertices(Graph & g, std::vector<struct vertex> vertices)
+void Graph::removeVertices(std::vector<struct vertex> rm)
 {
 	std::function getVertexIndex = [] (std::vector<vertex> & v, int id) -> int {
 		int index{-1};
@@ -104,73 +144,36 @@ std::unique_ptr<Graph> removeVertices(Graph & g, std::vector<struct vertex> vert
 		return index;
 	};
 
-	std::vector<struct vertex> graph_vertices{g.getVertices()};
-	std::vector<struct edge> graph_edges{g.getEdges()};
-
-	std::vector<struct vertex> new_graph_vertices;
-	std::vector<struct edge> new_graph_edges;
-
-	bool rm{false};
-	for(int e{0}; e < graph_edges.size(); ++e)
+	for(int e{0}; e < edges.size(); ++e)
 	{
-		int v1{getVertexIndex(graph_vertices, graph_edges[e].from)};
-		int v2{getVertexIndex(graph_vertices, graph_edges[e].to)};
-		for(int i{0}; i < vertices.size(); ++i)
+		int v1{getVertexIndex(vertices, edges[e].from)};
+		int v2{getVertexIndex(vertices, edges[e].to)};
+		for(int i{0}; i < rm.size(); ++i)
 		{
-			int id{vertices[i].id};
-			if(v1 == id || v2 == id)
+			int id{rm[i].id};
+			if(vertices[v1].id == id || vertices[v2].id == id)
 			{
-				rm = true;
+				vertices[v1].degree--;
+				vertices[v2].degree--;
+				edges.erase(edges.begin() + e);
 				break;
 			}
 		}
-		if(!rm)
-		{
-			struct vertex new_v1 = vertex(v1);
-			struct vertex new_v2 = vertex(v2);
-			struct edge new_edge = edge(v1, v2);
-			
-			bool findv1{false};
-			bool findv2{false};
-			for(int j{0}; j < new_graph_vertices.size(); ++j)
-			{
-				if(new_graph_vertices[j].id == new_v1.id)
-					findv1 = true;
-				else if(new_graph_vertices[j].id == new_v2.id)
-					findv2 = true;
-			}
-
-			new_graph_edges.push_back(new_edge);
-			if(!findv1){new_graph_vertices.push_back(new_v1);}
-			if(!findv2){new_graph_vertices.push_back(new_v2);}
-		}
-		else
-			rm = false;
 	}
 
-	std::sort(new_graph_vertices.begin(), new_graph_vertices.end(),
+	for(int v{0}; v < rm.size(); ++v)
+		for(int i{0}; i < vertices.size(); ++i)
+			if(vertices[i].id == rm[v].id)
+				vertices.erase(vertices.begin() + i);
+
+	std::sort(vertices.begin(), vertices.end(),
 			[] (struct vertex a, struct vertex b) -> bool{
 				return (a.id < b.id) ? true : false;
 			});
-
-	std::unique_ptr<Graph> new_g{std::make_unique<Graph>(new_graph_vertices, new_graph_edges)};
-	return new_g;
 }
 
-std::vector<struct vertex> getVerticesDegree(Graph & g)
+struct vertex Graph::getMaxDegreeVertex()
 {
-	return g.getVertices();
-}
-
-std::vector<struct vertex> getVerticesDegree(std::unique_ptr<Graph> & g)
-{
-	return g->getVertices();
-}
-
-
-struct vertex getMaxDegreeVertex(Graph & g)
-{
-	std::vector<struct vertex> vertices{g.getVertices()};
 	int index{0};
 	for(int i{1}; i < vertices.size(); ++i)
 	{
@@ -180,53 +183,46 @@ struct vertex getMaxDegreeVertex(Graph & g)
 	return vertices[index];
 }
 
-struct vertex getMaxDegreeVertex(std::unique_ptr<Graph> & g)
+std::vector<struct vertex> Graph::algo_couplage()
 {
-	std::vector<struct vertex> vertices{g->getVertices()};
-	int index{0};
-	for(int i{1}; i < vertices.size(); ++i)
+	std::vector<struct vertex> couverture;
+	for(auto e : edges)
 	{
-		if(vertices[i].degree > vertices[index].degree)
-			index = i;
-	}
-	return vertices[index];
-}
-
-std::unique_ptr<Graph> createGraph(int num_vertex, double p)
-{
-	std::function getVertexIndex = [] (std::vector<vertex> & v, int id) -> int {
-		int index{-1};
-		for(int i{0}; i < v.size(); ++i)
+		bool inside{false};
+		for(int i{0}; i < couverture.size(); ++i)
 		{
-			if(v[i].id == id)
+			struct vertex v{couverture[i]};
+			if(v.id == e.from || v.id == e.to)
 			{
-				index = i;
+				inside = true;
 				break;
 			}
 		}
-		return index;
-	};
-
-	std::random_device rd;
-	std::mt19937 mt(rd());
-	std::uniform_real_distribution<double> dist(0.0, 1.0);
-
-	std::vector<struct vertex> v;
-	std::vector<struct edge> e;
-
-	for(int i{0}; i < num_vertex; ++i)
-	{
-		for(int j{i+1}; j < num_vertex; ++j)
+		if(!inside)
 		{
-			if(getVertexIndex(v, i) == -1)
-				v.emplace_back(i);
-			if(getVertexIndex(v, j) == -1)
-				v.emplace_back(j);
-			if(dist(mt) <= p)
-				e.emplace_back(i, j);
+			couverture.push_back(e.from);
+			couverture.push_back(e.to);
+		}
+	}
+	return couverture;
+}
+
+std::vector<struct vertex> Graph::algo_glouton()
+{
+	std::vector<struct vertex> couverture;
+	while(!edges.empty())
+	{
+		struct vertex v{getMaxDegreeVertex()};
+		if(v.degree == -1 && v.id == -1)
+			break;
+		couverture.push_back(v);
+		removeVertices({v});
+		for(int e{0}; e < edges.size(); ++e)
+		{
+			if(v.id == edges[e].from || v.id == edges[e].to)
+				edges.erase(edges.begin() + e);
 		}
 	}
 
-	std::unique_ptr<Graph> g{std::make_unique<Graph>(v, e)};
-	return g;
+	return couverture;
 }

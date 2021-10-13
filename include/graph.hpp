@@ -25,10 +25,16 @@ struct edge
 class Graph
 {
 	public:
+		Graph(int num_vertex, double p);
 		Graph(std::vector<struct vertex> v, std::vector<struct edge> e);
 		void display();
 		std::vector<struct vertex> getVertices();
+		std::vector<struct vertex> getVerticesDegree();
 		std::vector<struct edge> getEdges();
+		void removeVertices(std::vector<struct vertex> vertices);
+		struct vertex getMaxDegreeVertex();
+		std::vector<struct vertex> algo_couplage();
+		std::vector<struct vertex> algo_glouton();
 
 	private:
 		void init();
@@ -39,19 +45,5 @@ class Graph
 		std::unique_ptr<std::unique_ptr<bool[]>[]> adjacency;
 };
 
-// suppression d'un ensemble de sommets du graphe
-// et de toutes les arêtes liées à ce sommet
-std::unique_ptr<Graph> removeVertices(Graph & g, std::vector<struct vertex> vertices);
-
-// affiche le degré de chaque sommet du graphe
-std::vector<struct vertex> getVerticesDegree(Graph & g);
-std::vector<struct vertex> getVerticesDegree(std::unique_ptr<Graph> & g);
-
-// renvoie le sommet de degré maximum
-struct vertex getMaxDegreeVertex(Graph & g);
-struct vertex getMaxDegreeVertex(std::unique_ptr<Graph> & g);
-
-// generation d'instance avec paramètre p : un flottant entre 0 et 1 tous deux exclus
-std::unique_ptr<Graph> createGraph(int num_vertex, double p);
 
 #endif

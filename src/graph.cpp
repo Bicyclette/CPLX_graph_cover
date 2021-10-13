@@ -1,5 +1,9 @@
 #include "graph.hpp"
 
+std::vector<struct vertex> Graph::solution;
+std::vector<struct vertex> Graph::path;
+std::stack<Graph> Graph::branch_stack;
+
 Graph::Graph(int num_vertex, double p)
 {
 	std::function getVertexIndex = [] (std::vector<vertex> & v, int id) -> int {
@@ -43,6 +47,13 @@ Graph::Graph(std::vector<struct vertex> v, std::vector<struct edge> e) :
 			[] (struct vertex a, struct vertex b) -> bool{
 				return (a.id < b.id) ? true : false;
 			});
+	init();
+}
+
+Graph::Graph(const Graph & g) :
+	vertices(g.vertices),
+	edges(g.edges)
+{
 	init();
 }
 
@@ -172,6 +183,55 @@ void Graph::removeVertices(std::vector<struct vertex> rm)
 			});
 }
 
+Graph Graph::removeVerticesCpy(std::vector<struct vertex> rm)
+{
+	std::function getVertexIndex = [] (std::vector<vertex> & v, int id) -> int {
+		int index{-1};
+		for(int i{0}; i < v.size(); ++i)
+		{
+			if(v[i].id == id)
+			{
+				index = i;
+				break;
+			}
+		}
+		return index;
+	};
+
+	std::vector<struct vertex> new_vertices = vertices;
+	std::vector<struct edge> new_edges = edges;
+
+	for(int e{0}; e < new_edges.size(); ++e)
+	{
+		int v1{getVertexIndex(new_vertices, new_edges[e].from)};
+		int v2{getVertexIndex(new_vertices, new_edges[e].to)};
+		for(int i{0}; i < rm.size(); ++i)
+		{
+			int id{rm[i].id};
+			if(new_vertices[v1].id == id || new_vertices[v2].id == id)
+			{
+				new_vertices[v1].degree--;
+				new_vertices[v2].degree--;
+				new_edges.erase(new_edges.begin() + e);
+				e--;
+				break;
+			}
+		}
+	}
+
+	for(int v{0}; v < rm.size(); ++v)
+		for(int i{0}; i < new_vertices.size(); ++i)
+			if(new_vertices[i].id == rm[v].id)
+				new_vertices.erase(new_vertices.begin() + i);
+
+	std::sort(new_vertices.begin(), new_vertices.end(),
+			[] (struct vertex a, struct vertex b) -> bool{
+				return (a.id < b.id) ? true : false;
+			});
+
+	return Graph(new_vertices, new_edges);
+}
+
 struct vertex Graph::getMaxDegreeVertex()
 {
 	int index{0};
@@ -225,4 +285,65 @@ std::vector<struct vertex> Graph::algo_glouton()
 	}
 
 	return couverture;
+}
+
+std::vector<struct vertex> Graph::get_reachable_vertices(int v)
+{
+	std::vector<struct vertex> reachable;
+	for(int i{0}; i < vertices.size(); ++i)
+	{
+		if(adjacency[v][i] == 1)
+			reachable.push_back(vertices[i].id);
+	}
+	return reachable;
+}
+
+std::vector<struct vertex> Graph::init_branch()
+{
+	// si on est sur une feuille, alors fin
+	if(edges.empty() == 0)
+		return vertices;
+
+	// on empile le graphe
+	branch_stack.push(*this);
+
+	// on prend une arête
+	struct edge e{edges[0]};
+
+	path.push_back(e.from);
+	explore = get_reachable_vertices(e.from);
+	Graph g1 = removeVerticesCpy({e.from});
+	g1.branch(explore);
+	path.pop_back();
+
+	path.push_back(e.to);
+	explore = get_reachable_vertices(e.to);
+	Graph g2 = removeVerticesCpy({e.to});
+	g2.branch(explore);
+	path.pop_back();
+
+	return solution;
+}
+
+void Graph::branch(const std::vector<struct vertex> & g_explore)
+{
+	// si on est sur une feuille alors fin
+	if(edges.empty())
+	{
+		path.push_back(vertices[0]);
+		if(solution.size() == 0 || path.size() < solution.size())
+			solution = path;
+		return;
+	}
+	else
+	{
+		for(auto v : g_explore) // explore tous les sommets atteignables
+		{
+			path.push_back(v);
+			explore = get_reachable_vertices(v.id);
+			Graph g = removeVerticesCpy({v});
+			g.branch(explore);
+			path.pop_back();
+		}
+	}
 }

@@ -2,6 +2,7 @@
 
 int main(int argc, char * argv[])
 {
+	/*
 	Graph g(4, 0.5);
 	g.display();
 	std::vector<struct vertex> degree = g.getVerticesDegree();
@@ -16,7 +17,7 @@ int main(int argc, char * argv[])
 	std::cout << "COUVERTURE glouton :" << std::endl;
 	for(auto v : couverture2)
 		std::cout << "vertex " << v.id << std::endl;
-/*
+*/
 	std::vector<struct vertex> lv{0, 1, 2, 3};
 	std::vector<struct edge> le;
 	le.emplace_back(0,1);
@@ -25,11 +26,10 @@ int main(int argc, char * argv[])
 	le.emplace_back(3,1);
 	Graph g(lv, le);
 	g.display();
-	std::vector<struct vertex> couverture = g.algo_couplage();
-	for(auto v : couverture)
-		std::cout << "vertex " << v.id << std::endl;
-	g.display();
-	//g.removeVertices({1});
-	*/
+	std::vector<struct vertex> res = g.init_branch();
+	for(auto v : res)
+		std::cout << v.id << ", ";
+	std::cout << std::endl;
+
 	return 0;
 }

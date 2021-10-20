@@ -3,6 +3,17 @@
 std::vector<struct vertex> Graph::solution;
 std::stack<Graph> Graph::branch_stack;
 std::stack<std::vector<struct vertex>> Graph::reachable_stack;
+double Graph::borne_sup;
+double Graph::borne_inf;
+
+Graph & Graph::operator=(const Graph & g)
+{
+	vertices = g.vertices;
+	edges = g.edges;
+	path = g.path;
+	init();
+	return *this;
+}
 
 Graph::Graph(int num_vertex, double p)
 {
@@ -416,10 +427,97 @@ std::vector<struct vertex> Graph::branch()
 		{
 			// on est sur une feuille
 			head.path.pop_back();
-			std::cout << "solution : ";
+			/*std::cout << "solution : ";
 			for(auto s : head.path)
 				std::cout << s.id << ", ";
-			std::cout << std::endl;
+			std::cout << std::endl;*/
+			if(solution.empty() || solution.size() > head.path.size())
+				solution = head.path;
+		}
+	}
+
+	// fin
+	return solution;
+}
+
+std::vector<struct vertex> Graph::branch_bound()
+{
+	// si on est sur une feuille, alors fin
+	if(edges.empty())
+		return vertices;
+
+	// sinon : branchement
+	branch_stack.push(*this);
+	std::vector<struct vertex> explore{edges[0].from, edges[0].to};
+	reachable_stack.push(explore);
+
+	// calcul d'un couplage et d'une borne inf
+	std::function lower_limit = [] (Graph & g)
+	{
+		double n{g.getVertices().size()};
+		double m{g.getEdges().size()};
+		std::vector<struct vertex> couplage = g.algo_couplage();
+		double b1{std::ceil(m/g.getMaxDegreeVertex().degree)};
+		double b2{couplage.size() / 2.0};
+		double b3{(2.0*n-1.0 - sqrt((2.0*n-1.0)*(2.0*n-1)-8.0*m))/2.0};
+		return std::max(b1, std::max(b2, b3));
+	};
+
+	borne_inf = lower_limit(*this);
+	borne_sup = algo_couplage().size();
+
+	while(!branch_stack.empty())
+	{
+		// on récupère le sommet de la pile
+		auto head = branch_stack.top();
+		branch_stack.pop();
+		std::vector<struct vertex> nodes = reachable_stack.top();
+		reachable_stack.pop();
+
+		// pour chaque sommet atteignable
+		// créer le sous graphe correspondant
+		// et le mettre dans la pile
+		if(!nodes.empty())
+		{
+			Graph subgraph;
+			std::vector<struct vertex> subGraphExplore;
+			for(auto v : nodes)
+			{
+				Graph g = head.removeVerticesCpy({v});
+				for(auto hpath : head.path)
+					g.path.push_back(hpath);
+				g.path.push_back(v);
+				explore = head.get_reachable_vertices(v.id);
+				// autre partie non connexe
+				if(explore.empty() && !g.getEdges().empty())
+				{
+					struct vertex u{g.getEdges()[0].from};
+					struct vertex v{g.getEdges()[0].to};
+					explore = {u,v};
+				}
+				// calcul d'une solution réalisable pour
+				// le sous graphe g et d'une borne inf
+				if(!g.getVertices().empty())
+				{
+					double binf{lower_limit(g)};
+					double bsup{g.algo_couplage().size()};
+					// élagage
+					if(bsup <= borne_sup && binf <= borne_inf)
+					{
+						borne_sup = bsup;
+						borne_inf = binf;
+						subgraph = g;
+						subGraphExplore = explore;
+					}
+				}
+			}
+			branch_stack.push(subgraph);
+			reachable_stack.push(subGraphExplore);
+		}
+		else
+		{
+			// on est sur une feuille
+			head.path.pop_back();
 			if(solution.empty() || solution.size() > head.path.size())
 				solution = head.path;
 		}

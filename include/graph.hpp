@@ -12,6 +12,7 @@
 #include <stack>
 #include <string>
 #include <cstring>
+#include <cmath>
 
 struct vertex
 {
@@ -30,6 +31,7 @@ struct edge
 class Graph
 {
 	public:
+		Graph(){};
 		Graph(int num_vertex, double p);
 		Graph(std::vector<struct vertex> v, std::vector<struct edge> e);
 		Graph(const Graph & g);
@@ -44,6 +46,10 @@ class Graph
 		std::vector<struct vertex> algo_couplage();
 		std::vector<struct vertex> algo_glouton();
 		std::vector<struct vertex> branch();
+		std::vector<struct vertex> branch_bound();
+
+	public: // operator
+		Graph & operator=(const Graph & g);
 
 	private:
 		void init();
@@ -60,6 +66,8 @@ class Graph
 		static std::vector<struct vertex> solution; // notre best value
 		static std::stack<Graph> branch_stack;
 		static std::stack<std::vector<struct vertex>> reachable_stack;
+		static double borne_sup;
+		static double borne_inf;
 };
 
 

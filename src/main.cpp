@@ -22,11 +22,11 @@ int main(int argc, char * argv[])
 	std::vector<struct edge> le;
 	le.emplace_back(0,1);
 	le.emplace_back(1,2);
-	le.emplace_back(3,2);
-	le.emplace_back(3,1);
+	le.emplace_back(2,3);
 	Graph g(lv, le);
 	g.display();
-	std::vector<struct vertex> res = g.init_branch();
+	std::vector<struct vertex> res = g.branch();
+	std::cout << "solution finale : ";
 	for(auto v : res)
 		std::cout << v.id << ", ";
 	std::cout << std::endl;

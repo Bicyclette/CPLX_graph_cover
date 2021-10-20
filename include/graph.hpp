@@ -39,8 +39,7 @@ class Graph
 		struct vertex getMaxDegreeVertex();
 		std::vector<struct vertex> algo_couplage();
 		std::vector<struct vertex> algo_glouton();
-		std::vector<struct vertex> init_branch();
-		void branch(const std::vector<struct vertex> & g_explore);
+		std::vector<struct vertex> branch();
 
 	private:
 		void init();
@@ -52,12 +51,11 @@ class Graph
 		std::unique_ptr<std::unique_ptr<bool[]>[]> adjacency;
 
 	// séparation et évaluation
-	private:
-		std::vector<struct vertex> explore;
 	public:
+		std::vector<struct vertex> path;
 		static std::vector<struct vertex> solution; // notre best value
-		static std::vector<struct vertex> path;
-		static std::stack<std::reference_wrapper<Graph>> branch_stack;
+		static std::stack<Graph> branch_stack;
+		static std::stack<std::vector<struct vertex>> reachable_stack;
 };
 
 

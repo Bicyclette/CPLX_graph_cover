@@ -1,8 +1,8 @@
 #include "graph.hpp"
 
 std::vector<struct vertex> Graph::solution;
-std::vector<struct vertex> Graph::path;
-std::stack<std::reference_wrapper<Graph>> Graph::branch_stack;
+std::stack<Graph> Graph::branch_stack;
+std::stack<std::vector<struct vertex>> Graph::reachable_stack;
 
 Graph::Graph(int num_vertex, double p)
 {
@@ -52,7 +52,8 @@ Graph::Graph(std::vector<struct vertex> v, std::vector<struct edge> e) :
 
 Graph::Graph(const Graph & g) :
 	vertices(g.vertices),
-	edges(g.edges)
+	edges(g.edges),
+	path(g.path)
 {
 	init();
 }
@@ -289,66 +290,76 @@ std::vector<struct vertex> Graph::algo_glouton()
 
 std::vector<struct vertex> Graph::get_reachable_vertices(int v)
 {
+	int rank{0};
+	for(; rank < vertices.size(); ++rank)
+	{
+		if(vertices[rank].id == v)
+			break;
+	}
+
 	std::vector<struct vertex> reachable;
 	for(int i{0}; i < vertices.size(); ++i)
 	{
-		if(adjacency[v][i] == 1)
+		if(adjacency[rank][i] == 1)
 			reachable.push_back(vertices[i].id);
 	}
 	return reachable;
 }
 
-std::vector<struct vertex> Graph::init_branch()
+std::vector<struct vertex> Graph::branch()
 {
 	// si on est sur une feuille, alors fin
-	if(edges.empty() == 0)
+	if(edges.empty())
 		return vertices;
 
-	// on prend une arête
-	struct edge e{edges[0]};
+	// sinon : branchement
+	branch_stack.push(*this);
+	std::vector<struct vertex> explore{edges[0].from, edges[0].to};
+	reachable_stack.push(explore);
 
-	// on empile les deux sous graphes
-	Graph g1 = removeVerticesCpy({e.from});
-	Graph g2 = removeVerticesCpy({e.to});
-	branch_stack.push(g1);
-	branch_stack.push(g2);
+	while(!branch_stack.empty())
+	{
+		// on récupère le sommet de la pile
+		auto head = branch_stack.top();
+		branch_stack.pop();
+		std::vector<struct vertex> nodes = reachable_stack.top();
+		reachable_stack.pop();
 
-	// on branche
-	path.push_back(e.from);
-	branch_stack.top().get().branch(explore);
-	branch_stack.pop();
-	path.pop_back();
-	path.push_back(e.to);
-	branch_stack.top().get().branch(explore);
-	branch_stack.pop();
-	path.pop_back();
+		// pour chaque sommet atteignable
+		// créer le sous graphe correspondant
+		// et le mettre dans la pile
+		if(!nodes.empty())
+		{
+			for(auto v : nodes)
+			{
+				Graph g = head.removeVerticesCpy({v});
+				for(auto hpath : head.path)
+					g.path.push_back(hpath);
+				g.path.push_back(v);
+				explore = head.get_reachable_vertices(v.id);
+				if(explore.empty() && !g.getEdges().empty())
+				{
+					struct vertex u{g.getEdges()[0].from};
+					struct vertex v{g.getEdges()[0].to};
+					explore = {u,v};
+				}
+				branch_stack.push(g);
+				reachable_stack.push(explore);
+			}
+		}
+		else
+		{
+			// on est sur une feuille
+			head.path.pop_back();
+			std::cout << "solution : ";
+			for(auto s : head.path)
+				std::cout << s.id << ", ";
+			std::cout << std::endl;
+			if(solution.empty() || solution.size() > head.path.size())
+				solution = head.path;
+		}
+	}
 
 	// fin
 	return solution;
-}
-
-void Graph::branch(const std::vector<struct vertex> & g_explore)
-{
-	// si on est sur une feuille alors fin
-	if(edges.empty())
-	{
-		path.push_back(vertices[0]);
-		if(solution.size() == 0 || path.size() < solution.size())
-			solution = path;
-		return;
-	}
-	else
-	{
-		for(auto v : g_explore) // explore tous les sommets atteignables
-		{
-			explore = get_reachable_vertices(v.id);
-			Graph g = removeVerticesCpy({v});
-			branch_stack.push(g);
-			path.push_back(v);
-			g.branch(explore);
-			branch_stack.top().get().branch(explore);
-			branch_stack.pop();
-			path.pop_back();
-		}
-	}
 }

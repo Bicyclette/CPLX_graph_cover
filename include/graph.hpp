@@ -2,6 +2,7 @@
 #define GRAPH_HPP
 
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <memory>
 #include <utility>
@@ -9,6 +10,8 @@
 #include <random>
 #include <functional>
 #include <stack>
+#include <string>
+#include <cstring>
 
 struct vertex
 {
@@ -30,6 +33,7 @@ class Graph
 		Graph(int num_vertex, double p);
 		Graph(std::vector<struct vertex> v, std::vector<struct edge> e);
 		Graph(const Graph & g);
+		Graph(std::string file);
 		void display();
 		std::vector<struct vertex> getVertices();
 		std::vector<struct vertex> getVerticesDegree();

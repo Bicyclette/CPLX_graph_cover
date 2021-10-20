@@ -58,6 +58,70 @@ Graph::Graph(const Graph & g) :
 	init();
 }
 
+Graph::Graph(std::string file)
+{
+	std::function tokenize =
+		[] (std::string const & str, const char delim, std::vector<std::string> & out)
+		{
+			size_t start;
+			size_t end{0};
+			while((start = str.find_first_not_of(delim, end)) != std::string::npos)
+			{
+				end = str.find(delim, start);
+				out.push_back(str.substr(start, end - start));
+			}
+		};
+
+	std::ifstream instance;
+	instance.open(file);
+
+	// récupération des données
+	std::string line;
+	int num_vertex{0};
+	int num_edge{0};
+	std::vector<struct vertex> lv;
+	std::vector<struct edge> le;
+
+	// nombre de sommets
+	std::getline(instance, line);
+	std::getline(instance, line);
+	num_vertex = std::stoi(line);
+
+	// sommets
+	std::getline(instance, line);
+	for(int i{0}; i < num_vertex; ++i)
+	{
+		std::getline(instance, line);
+		lv.emplace_back(std::stoi(line));
+	}
+
+	// nombre d'arêtes
+	std::getline(instance, line);
+	std::getline(instance, line);
+	num_edge = std::stoi(line);
+
+	// arêtes
+	std::getline(instance, line);
+	for(int i{0}; i < num_edge; ++i)
+	{
+		std::getline(instance, line);
+		std::vector<std::string> parts;
+		tokenize(line, ' ', parts);
+		std::string from = parts[0];
+		std::string to = parts[1];
+		le.emplace_back(std::stoi(from), std::stoi(to));
+	}
+
+	// création du graphe
+	vertices = lv;
+	edges = le;
+	std::sort(vertices.begin(), vertices.end(),
+			[] (struct vertex a, struct vertex b) -> bool{
+				return (a.id < b.id) ? true : false;
+			});
+	init();
+}
+
 void Graph::init()
 {
 	std::function getVertexIndex = [] (std::vector<vertex> & v, int id) -> int {
@@ -337,6 +401,7 @@ std::vector<struct vertex> Graph::branch()
 					g.path.push_back(hpath);
 				g.path.push_back(v);
 				explore = head.get_reachable_vertices(v.id);
+				// autre partie non connexe
 				if(explore.empty() && !g.getEdges().empty())
 				{
 					struct vertex u{g.getEdges()[0].from};

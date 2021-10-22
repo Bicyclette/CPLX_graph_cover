@@ -19,7 +19,7 @@ int main(int argc, char * argv[])
 	*/
 
 	Graph g("../instances/exempleinstance.txt");
-	g.display();
+	//g.display();
 	
 	auto start = std::chrono::high_resolution_clock::now();
 	std::vector<struct vertex> res1 = g.branch();
@@ -32,8 +32,14 @@ int main(int argc, char * argv[])
 	stop = std::chrono::high_resolution_clock::now();
 	auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 	std::cout << "branch & bound method took : " << duration2.count() << " microseconds." << std::endl;
+	
+	start = std::chrono::high_resolution_clock::now();
+	std::vector<struct vertex> res3 = g.branch_bound_v2();
+	stop = std::chrono::high_resolution_clock::now();
+	auto duration3 = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	std::cout << "branch & bound v2 method took : " << duration3.count() << " microseconds." << std::endl;
 
-	std::cout << "solution branch : ";
+	std::cout << "\nsolution branch : ";
 	for(auto v : res1)
 		std::cout << v.id << ", ";
 	std::cout << std::endl;
@@ -41,8 +47,13 @@ int main(int argc, char * argv[])
 	for(auto v : res2)
 		std::cout << v.id << ", ";
 	std::cout << std::endl;
+	std::cout << "solution branch & bound v2 : ";
+	for(auto v : res3)
+		std::cout << v.id << ", ";
+	std::cout << std::endl;
 
-	std::cout << "Branch & bound method is " << duration1.count() / duration2.count() << " times faster on the current graph." << std::endl;
+	std::cout << "\nBranch & bound method is " << duration1.count() / duration2.count() << " times faster on the current graph." << std::endl;
+	std::cout << "Branch & bound v2 method is " << duration1.count() / duration3.count() << " times faster on the current graph." << std::endl;
 
 	return 0;
 }

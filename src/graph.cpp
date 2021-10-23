@@ -410,6 +410,7 @@ std::vector<struct vertex> Graph::branch()
 				Graph g = head.removeVerticesCpy({v});
 				for(auto hpath : head.path)
 					g.path.push_back(hpath);
+				g.path.push_back(v);
 				explore = head.get_reachable_vertices(v.id);
 				std::vector<struct vertex> explore_uncovered;
 				for(auto e : explore)
@@ -425,8 +426,8 @@ std::vector<struct vertex> Graph::branch()
 					struct vertex v{g.getEdges()[0].to};
 					explore = {u,v};
 				}
-				else
-					g.path.push_back(v);
+				//else
+					//g.path.push_back(v);
 				branch_stack.push(g);
 				reachable_stack.push(explore);
 			}
@@ -489,6 +490,7 @@ std::vector<struct vertex> Graph::branch_bound()
 				Graph g = head.removeVerticesCpy({v});
 				for(auto hpath : head.path)
 					g.path.push_back(hpath);
+				g.path.push_back(v);
 				explore = head.get_reachable_vertices(v.id);
 				std::vector<struct vertex> explore_uncovered;
 				for(auto e : explore)
@@ -504,8 +506,8 @@ std::vector<struct vertex> Graph::branch_bound()
 					struct vertex v{g.getEdges()[0].to};
 					explore = {u,v};
 				}
-				else
-					g.path.push_back(v);
+				//else
+					//g.path.push_back(v);
 				// calcul d'une solution réalisable pour
 				// le sous graphe g et d'une borne inf
 				if(!g.getVertices().empty())

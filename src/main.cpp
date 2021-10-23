@@ -72,6 +72,63 @@ void exec(Graph & g)
 	g.display();
 }
 
+void test_branch(Graph & g)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+	std::vector<struct vertex> res1 = g.branch();
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	std::cout << duration.count() << std::endl;
+}
+
+void test_branch_bound(Graph & g)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+	std::vector<struct vertex> res1 = g.branch_bound();
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	std::cout << duration.count() << std::endl;
+}
+
+void test_branch_bound_v2(Graph & g)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+	std::vector<struct vertex> res = g.branch_bound_v2();
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	std::cout << duration.count() << std::endl;
+}
+
+void test_branch_bound_v3(Graph & g)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+	std::vector<struct vertex> res = g.branch_bound_v3();
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	std::cout << duration.count() << std::endl;
+}
+
+void compare_couplage_glouton(Graph & g)
+{
+	auto start = std::chrono::high_resolution_clock::now();
+	std::vector<struct vertex> res1 = g.algo_couplage();
+	auto stop = std::chrono::high_resolution_clock::now();
+	auto duration1 = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	std::cout << duration1.count() << std::endl;
+
+	start = std::chrono::high_resolution_clock::now();
+	std::vector<struct vertex> res2 = g.algo_glouton();
+	stop = std::chrono::high_resolution_clock::now();
+	auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	std::cout << duration2.count() << std::endl;
+
+	std::cout << res1.size();
+	std::cout << std::endl;
+
+	std::cout << res2.size();
+	std::cout << std::endl;
+}
+
 int main(int argc, char * argv[])
 {
 	// Parse command line arguments
@@ -85,6 +142,13 @@ int main(int argc, char * argv[])
 				arg_error();
 			std::string instance{argv[2]};
 			Graph g(instance);
+			
+			// tests #####
+			//compare_couplage_glouton(g);
+			//test_branch(g);
+			//test_branch_bound(g);
+			//test_branch_bound_v2(g);
+			//test_branch_bound_v3(g);
 			exec(g);
 		}
 		else if(strncmp(argv[1], "-n", 2) == 0) // random graph of n vertices
@@ -94,6 +158,13 @@ int main(int argc, char * argv[])
 			int vertices{std::stoi(argv[2])};
 			double probability{std::stod(argv[3])};
 			Graph g(vertices, probability);
+			
+			// tests #####
+			//compare_couplage_glouton(g);
+			//test_branch(g);
+			//test_branch_bound(g);
+			//test_branch_bound_v2(g);
+			//test_branch_bound_v3(g);
 			exec(g);
 		}
 		else

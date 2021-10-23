@@ -13,6 +13,7 @@
 #include <string>
 #include <cstring>
 #include <cmath>
+#include <limits>
 
 struct vertex
 {
@@ -48,6 +49,7 @@ class Graph
 		std::vector<struct vertex> branch();
 		std::vector<struct vertex> branch_bound();
 		std::vector<struct vertex> branch_bound_v2();
+		std::vector<struct vertex> branch_bound_v3();
 
 	public: // operator
 		Graph & operator=(const Graph & g);

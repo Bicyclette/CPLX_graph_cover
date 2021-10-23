@@ -411,6 +411,13 @@ std::vector<struct vertex> Graph::branch()
 				for(auto hpath : head.path)
 					g.path.push_back(hpath);
 				explore = head.get_reachable_vertices(v.id);
+				std::vector<struct vertex> explore_uncovered;
+				for(auto e : explore)
+				{
+					std::vector<struct vertex> tmp = g.get_reachable_vertices(e.id);
+					explore_uncovered.insert(explore_uncovered.end(), tmp.begin(), tmp.end());
+				}
+				explore = explore_uncovered;
 				// autre partie non connexe
 				if(explore.empty() && !g.getEdges().empty())
 				{
@@ -427,7 +434,6 @@ std::vector<struct vertex> Graph::branch()
 		else
 		{
 			// on est sur une feuille
-			head.path.pop_back();
 			if(solution.empty() || solution.size() > head.path.size())
 				solution = head.path;
 		}
@@ -484,6 +490,13 @@ std::vector<struct vertex> Graph::branch_bound()
 				for(auto hpath : head.path)
 					g.path.push_back(hpath);
 				explore = head.get_reachable_vertices(v.id);
+				std::vector<struct vertex> explore_uncovered;
+				for(auto e : explore)
+				{
+					std::vector<struct vertex> tmp = g.get_reachable_vertices(e.id);
+					explore_uncovered.insert(explore_uncovered.end(), tmp.begin(), tmp.end());
+				}
+				explore = explore_uncovered;
 				// autre partie non connexe
 				if(explore.empty() && !g.getEdges().empty())
 				{
@@ -515,7 +528,6 @@ std::vector<struct vertex> Graph::branch_bound()
 		else
 		{
 			// on est sur une feuille/des feuilles
-			head.path.pop_back();
 			if(solution.empty() || solution.size() > head.path.size())
 				solution = head.path;
 		}
@@ -571,6 +583,13 @@ std::vector<struct vertex> Graph::branch_bound_v2()
 			{
 				Graph g = head.removeVerticesCpy({v});
 				explore = head.get_reachable_vertices(v.id);
+				std::vector<struct vertex> explore_uncovered;
+				for(auto e : explore)
+				{
+					std::vector<struct vertex> tmp = g.get_reachable_vertices(e.id);
+					explore_uncovered.insert(explore_uncovered.end(), tmp.begin(), tmp.end());
+				}
+				explore = explore_uncovered;
 				// autre partie non connexe
 				if(explore.empty() && !g.getEdges().empty())
 				{

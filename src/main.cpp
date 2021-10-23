@@ -18,7 +18,6 @@ void arg_error()
 
 void exec(Graph & g)
 {
-	g.display();
 	auto start = std::chrono::high_resolution_clock::now();
 	std::vector<struct vertex> res1 = g.branch();
 	auto stop = std::chrono::high_resolution_clock::now();

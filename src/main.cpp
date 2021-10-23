@@ -22,36 +22,54 @@ void exec(Graph & g)
 	std::vector<struct vertex> res1 = g.branch();
 	auto stop = std::chrono::high_resolution_clock::now();
 	auto duration1 = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-	std::cout << "branch method took : " << duration1.count() << " microseconds." << std::endl;
+	std::cout << "4.1 : " << duration1.count() << " microseconds." << std::endl;
 
 	start = std::chrono::high_resolution_clock::now();
 	std::vector<struct vertex> res2 = g.branch_bound();
 	stop = std::chrono::high_resolution_clock::now();
 	auto duration2 = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-	std::cout << "branch & bound method took : " << duration2.count() << " microseconds." << std::endl;
+	std::cout << "4.2 : " << duration2.count() << " microseconds." << std::endl;
 	
 	start = std::chrono::high_resolution_clock::now();
 	std::vector<struct vertex> res3 = g.branch_bound_v2();
 	stop = std::chrono::high_resolution_clock::now();
 	auto duration3 = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
-	std::cout << "branch & bound v2 method took : " << duration3.count() << " microseconds." << std::endl;
+	std::cout << "4.3 : " << duration3.count() << " microseconds." << std::endl;
 
-	std::cout << "\nsolution branch : ";
-	for(auto v : res1)
-		std::cout << v.id << ", ";
+	std::cout << "\nsolution 4.1 : (";
+	for(int i{0}; i < res1.size(); ++i)
+	{
+		if(i == res1.size()-1)
+			std::cout << res1[i].id << ")";
+		else
+			std::cout << res1[i].id << ", ";
+	}
 	std::cout << std::endl;
 
-	std::cout << "solution branch & bound : ";
-	for(auto v : res2)
-		std::cout << v.id << ", ";
+	std::cout << "solution 4.2 : (";
+	for(int i{0}; i < res2.size(); ++i)
+	{
+		if(i == res2.size()-1)
+			std::cout << res2[i].id << ")";
+		else
+			std::cout << res2[i].id << ", ";
+	}
 	std::cout << std::endl;
-	std::cout << "solution branch & bound v2 : ";
-	for(auto v : res3)
-		std::cout << v.id << ", ";
+	
+	std::cout << "solution 4.3 : (";
+	for(int i{0}; i < res3.size(); ++i)
+	{
+		if(i == res3.size()-1)
+			std::cout << res3[i].id << ")";
+		else
+			std::cout << res3[i].id << ", ";
+	}
 	std::cout << std::endl;
 
-	std::cout << "\nBranch & bound method is " << duration1.count() / duration2.count() << " times faster on the current graph." << std::endl;
-	std::cout << "Branch & bound v2 method is " << duration1.count() / duration3.count() << " times faster on the current graph." << std::endl;
+	std::cout << "\n4.2 acceleration = " << duration1.count() / duration2.count() << std::endl;
+	std::cout << "4.3 acceleration =  " << duration1.count() / duration3.count() << std::endl;
+
+	g.display();
 }
 
 int main(int argc, char * argv[])
